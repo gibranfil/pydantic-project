@@ -25,3 +25,5 @@ class DatasetProfile(BaseModel):
     categorical_columns: list[CategoricalProfile]
 
     sample_rows: list[dict]
+
+    
