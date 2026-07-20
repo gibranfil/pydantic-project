@@ -16,14 +16,37 @@ class CategoricalProfile(ColumnProfile):
     unique_values: int
     top_values: dict[str, int]
 
+
+
+class DateTimeProfile(ColumnProfile):
+    earliest: str
+    latest: str
+    unique_dates: int
+
 class DatasetProfile(BaseModel):
+
     filename: str
+
     rows: int
+
     columns: int
 
     numeric_columns: list[NumericProfile]
+
     categorical_columns: list[CategoricalProfile]
+
+    datetime_columns: list[DateTimeProfile]
 
     sample_rows: list[dict]
 
-    
+class Dataset(BaseModel):
+
+    filename: str
+
+    profile: DatasetProfile
+
+class AIResponse(BaseModel):
+
+    answer: str
+
+    reasoning: str | None = None

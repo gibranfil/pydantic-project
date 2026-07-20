@@ -1,39 +1,39 @@
-from fastapi import FastAPI
-from fastapi import UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException
+
 from app.dataset_manager import dataset_manager
 
-
 app = FastAPI(
-    title="AI Data Analyst Assistant",
-    version="0.1.0"
+    title="AI Data Analyst Assistant"
 )
 
 
 @app.post("/upload")
-async def upload_dataset(
-    file: UploadFile = File(...)
-):
+async def upload_dataset(file: UploadFile = File(...)):
     try:
-
-        dataset_manager.validate_file(file.filename)
-
-        path = dataset_manager.save_uploaded_file(file)
-
-        df = dataset_manager.load_dataset(path)
-
-        dataset_manager.save_dataset(file.filename, df)
-
-        return dataset_manager.dataset_summary(df)
+        return dataset_manager.upload_dataset(file)
 
     except Exception as e:
-
         raise HTTPException(
             status_code=400,
-            detail=str(e)
+            detail=str(e),
         )
 
-@app.get("/")
-def home():
+
+@app.get("/datasets")
+def list_datasets():
+    return dataset_manager.list_datasets()
+
+
+@app.get("/datasets/{filename}")
+def get_dataset(filename: str):
+    return dataset_manager.get_profile(filename)
+
+
+@app.delete("/datasets/{filename}")
+def delete_dataset(filename: str):
+
+    dataset_manager.delete_dataset(filename)
+
     return {
-        "message": "AI Data Analyst Assistant is running!"
+        "message": "Dataset deleted."
     }

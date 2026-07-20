@@ -10,7 +10,6 @@ df = pd.DataFrame({
 
 profiler = DatasetProfiler(df, "sales.csv")
 
-profiles = profiler.profile_categorical_columns()
+profile = profiler.build_profile()
 
-for profile in profiles:
-    print(profile)
+print(profile.model_dump_json(indent=2))
