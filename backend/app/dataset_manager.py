@@ -5,10 +5,14 @@ import shutil
 import pandas as pd
 from fastapi import UploadFile
 
-from app.profiler.profiler import DatasetProfiler
+from app.profiler import DatasetProfiler
 from app.models import DatasetProfile
 
-UPLOAD_FOLDER = Path("uploads")
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+UPLOAD_FOLDER = BASE_DIR / "uploads"
 UPLOAD_FOLDER.mkdir(exist_ok=True)
 
 ALLOWED_EXTENSIONS = {
@@ -29,7 +33,11 @@ class DatasetRecord:
 class DatasetManager:
 
     def __init__(self):
+        print("DatasetManager initialized")
+    
         self.datasets: dict[str, DatasetRecord] = {}
+        self.load_existing_datasets()
+        print("Loaded datasets:", self.datasets.keys())
 
     ##########################################################
     # Upload
@@ -134,7 +142,7 @@ class DatasetManager:
     ##########################################################
 
     def list_datasets(self):
-
+    
         return list(self.datasets.keys())
 
     ##########################################################
@@ -152,6 +160,39 @@ class DatasetManager:
             dataset.filepath.unlink()
 
         del self.datasets[filename]
+
+    ##########################################################
+    # Load Dataset from Upload Folder
+    ##########################################################
+
+    def load_existing_datasets(self):
+
+        files = list(UPLOAD_FOLDER.iterdir())
+
+        print("Files:", files)
+
+        for filepath in files:
+
+            print("Loading:", filepath.name)
+
+            if filepath.suffix.lower() not in ALLOWED_EXTENSIONS:
+                continue
+
+            dataframe = self.load_dataset(filepath)
+
+            profile = DatasetProfiler(
+                dataframe=dataframe,
+                filename=filepath.name,
+            ).build_profile()
+
+            self.datasets[filepath.name] = DatasetRecord(
+                dataframe=dataframe,
+                profile=profile,
+                filepath=filepath,
+            )
+
+        print("Loaded datasets:", self.datasets.keys())
+
 
 
 dataset_manager = DatasetManager()

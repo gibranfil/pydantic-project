@@ -63,7 +63,7 @@ class DatasetProfiler:
 
             profile = NumericProfile(
                 name=column,
-                dtype=str(series.dtype),
+                data_type=str(series.dtype),
                 missing=int(series.isna().sum()),
                 mean=float(series.mean()),
                 median=float(series.median()),
@@ -105,7 +105,7 @@ class DatasetProfiler:
 
             profile = CategoricalProfile(
                 name=column,
-                dtype=str(series.dtype),
+                data_type=str(series.dtype),
                 missing=int(series.isna().sum()),
                 unique_values=int(series.nunique()),
                 top_values=top_values,
@@ -133,7 +133,7 @@ class DatasetProfiler:
 
             profile = DateTimeProfile(
                 name=column,
-                dtype=str(series.dtype),
+                data_type=str(series.dtype),
                 missing=int(series.isna().sum()),
                 earliest=series.min().isoformat(),
                 latest=series.max().isoformat(),

@@ -50,3 +50,7 @@ class AIResponse(BaseModel):
     answer: str
 
     reasoning: str | None = None
+
+
+class AIResponse(BaseModel):
+    answer: str
