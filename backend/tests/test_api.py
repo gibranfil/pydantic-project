@@ -1,3 +1,5 @@
+from unittest.mock import AsyncMock
+
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -32,3 +34,27 @@ def test_chat_endpoint_returns_response_model():
 
     assert "answer" in body
     assert isinstance(body["execution_time"], float)
+
+
+def test_chat_endpoint_passes_dependencies_to_agent(monkeypatch):
+    class FakeOutput:
+        answer = "ok"
+
+    class FakeResult:
+        output = FakeOutput()
+
+    async def fake_run(*args, **kwargs):
+        assert "deps" in kwargs
+        assert kwargs["deps"].dataset_manager is not None
+        return FakeResult()
+
+    mock_run = AsyncMock(side_effect=fake_run)
+    monkeypatch.setattr("app.main.agent.run", mock_run)
+
+    response = client.post(
+        "/chat",
+        json={"message": "Summarize this dataset", "dataset": "sales.csv"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["answer"] == "ok"

@@ -5,9 +5,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.agent import agent
 from app.dataset_manager import dataset_manager
+from app.dependencies import AgentDependencies
 from app.models import ChatRequest, ChatResponse, DatasetListResponse, DatasetResponse, UploadResponse
+from app.tools import print_backend_capabilities
 
 app = FastAPI(title="AI Data Analyst Assistant")
+print_backend_capabilities()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -55,12 +58,16 @@ async def chat(request: ChatRequest):
             message = request.message
 
         try:
-            result = await agent.run(message)
+            deps = AgentDependencies(dataset_manager=dataset_manager)
+            result = await agent.run(message, deps=deps)
             answer = result.output.answer
-        except Exception:
+        except Exception as exc:
+            import traceback
+
+            traceback.print_exc()
             answer = (
-                "The AI service is not available right now, so I can only offer a placeholder response. "
-                f"You asked: {request.message}"
+                "The AI service encountered an error while answering. "
+                f"Details: {exc}"
             )
 
         execution_time = round(time.perf_counter() - started_at, 3)

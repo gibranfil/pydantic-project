@@ -2,7 +2,7 @@ from pydantic_ai import Agent
 from app.prompts import SYSTEM_PROMPT
 from app.models import AIResponse
 from app.dependencies import AgentDependencies
-from app.tools import get_dataset_profile
+from app.tools import create_chart, get_dataset_profile, print_backend_capabilities
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -14,4 +14,6 @@ agent = Agent(
     instructions=SYSTEM_PROMPT,
 )
 agent.tool(get_dataset_profile)
+agent.tool(create_chart)
+print_backend_capabilities()
 

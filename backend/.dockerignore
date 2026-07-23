@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+.git
+.gitignore
+node_modules/
+npm-debug.log*
+uploads/
