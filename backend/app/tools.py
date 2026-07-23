@@ -1,11 +1,9 @@
 from pathlib import Path
 
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
 from pydantic_ai import RunContext
 
 from app.dependencies import AgentDependencies
+from app.visualization.create_chart import create_chart as render_chart
 
 
 def build_backend_capabilities() -> dict[str, list[str] | str]:
@@ -76,46 +74,13 @@ def create_chart(
         raise ValueError(f"Dataset '{filename}' was not found.")
 
     dataframe = dataset_manager.get_dataframe(filename)
-
-    if x_column not in dataframe.columns:
-        raise ValueError(f"Column '{x_column}' was not found in dataset '{filename}'.")
-
-    output_dir_path = Path(output_dir or str(Path(__file__).resolve().parent.parent / "uploads" / "charts"))
-    output_dir_path.mkdir(parents=True, exist_ok=True)
-
-    chart_filename = f"{Path(filename).stem}_{x_column}_{chart_type}.png"
-    output_path = output_dir_path / chart_filename
-
-    if y_column is None:
-        data = dataframe[x_column].value_counts()
-        title = f"Distribution of {x_column}"
-        ylabel = "Count"
-        if chart_type == "bar":
-            data.plot(kind="bar")
-        elif chart_type == "line":
-            data.plot(kind="line")
-        else:
-            raise ValueError("Only 'bar' and 'line' chart types are supported.")
-    else:
-        if y_column not in dataframe.columns:
-            raise ValueError(f"Column '{y_column}' was not found in dataset '{filename}'.")
-
-        if chart_type == "bar":
-            data = dataframe.groupby(x_column)[y_column].sum()
-        elif chart_type == "line":
-            data = dataframe.groupby(x_column)[y_column].sum()
-        else:
-            raise ValueError("Only 'bar' and 'line' chart types are supported.")
-
-        title = f"{y_column} by {x_column}"
-        ylabel = y_column
-        data.plot(kind=chart_type)
-
-    plt.title(title)
-    plt.xlabel(x_column)
-    plt.ylabel(ylabel)
-    plt.tight_layout()
-    plt.savefig(output_path, dpi=150)
-    plt.close()
+    output_path = render_chart(
+        dataframe=dataframe,
+        filename=filename,
+        x_column=x_column,
+        y_column=y_column,
+        chart_type=chart_type,
+        output_dir=output_dir,
+    )
 
     return f"Chart saved to {output_path}"

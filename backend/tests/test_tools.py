@@ -39,3 +39,19 @@ def test_create_chart_saves_png_file(tmp_path):
 
     assert "Chart saved" in result
     assert any(tmp_path.glob("*.png"))
+
+
+def test_create_chart_supports_histogram_style(tmp_path):
+    dataframe = pd.DataFrame({"Value": [1, 2, 2, 3, 3, 3]})
+    context = DummyContext(dataframe)
+
+    result = create_chart(
+        context,
+        "demo.csv",
+        "Value",
+        chart_type="histogram",
+        output_dir=str(tmp_path),
+    )
+
+    assert "Chart saved" in result
+    assert any(tmp_path.glob("*.png"))
