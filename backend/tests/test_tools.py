@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from app.tools import build_backend_capabilities, create_chart
 
@@ -51,6 +52,41 @@ def test_create_chart_supports_histogram_style(tmp_path):
         "Value",
         chart_type="histogram",
         output_dir=str(tmp_path),
+    )
+
+    assert "Chart saved" in result
+    assert any(tmp_path.glob("*.png"))
+
+
+def test_create_chart_with_filters_requires_parameters(tmp_path):
+    dataframe = pd.DataFrame({"date": ["2021-01-01", "2021-01-15"], "value": [1, 2]})
+    context = DummyContext(dataframe)
+
+    # missing 'end' should raise a clear ValueError
+    with pytest.raises(ValueError) as exc:
+        create_chart(
+            context,
+            "demo.csv",
+            "date",
+            chart_type="bar",
+            output_dir=str(tmp_path),
+            filters={"op": "date_between", "column": "date", "start": "2021-01-01"},
+        )
+
+    assert "requires both 'start' and 'end'" in str(exc.value)
+
+
+def test_create_chart_with_filters_applies_filters(tmp_path):
+    dataframe = pd.DataFrame({"date": ["2021-01-01", "2021-01-15", "2021-02-01"], "value": [1, 2, 3]})
+    context = DummyContext(dataframe)
+
+    result = create_chart(
+        context,
+        "demo.csv",
+        "date",
+        chart_type="bar",
+        output_dir=str(tmp_path),
+        filters={"op": "date_between", "column": "date", "start": "2021-01-01", "end": "2021-01-31"},
     )
 
     assert "Chart saved" in result

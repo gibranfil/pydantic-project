@@ -7,6 +7,18 @@ def _validate_column(df: pd.DataFrame, column: str):
         raise ValueError(f"Column '{column}' not found.")
 
 
+def _ensure_datetime_series(df: pd.DataFrame, column: str) -> pd.Series:
+    """Return a datetime-converted Series for the given column.
+
+    Raises ValueError if the column cannot be parsed as any datetimes.
+    """
+    # convert values to datetimes (coerce invalids to NaT)
+    series = pd.to_datetime(df[column], errors="coerce")
+    if series.isna().all():
+        raise ValueError(f"Column '{column}' cannot be parsed as datetimes")
+    return series
+
+
 def filter_equals(
     df: pd.DataFrame,
     column: str,
@@ -75,6 +87,73 @@ def filter_between(
         &
         (df[column] <= maximum)
     ]
+
+
+def filter_date_equals(
+    df: pd.DataFrame,
+    column: str,
+    value,
+) -> pd.DataFrame:
+    """
+    Return rows where the datetime-parsed `column` == `value`.
+    `value` can be any value accepted by `pd.to_datetime`.
+    """
+    _validate_column(df, column)
+
+    series = _ensure_datetime_series(df, column)
+    target = pd.to_datetime(value)
+
+    return df[series == target]
+
+
+def filter_date_before(
+    df: pd.DataFrame,
+    column: str,
+    value,
+) -> pd.DataFrame:
+    """
+    Return rows where the datetime-parsed `column` < `value`.
+    """
+    _validate_column(df, column)
+
+    series = _ensure_datetime_series(df, column)
+    target = pd.to_datetime(value)
+
+    return df[series < target]
+
+
+def filter_date_after(
+    df: pd.DataFrame,
+    column: str,
+    value,
+) -> pd.DataFrame:
+    """
+    Return rows where the datetime-parsed `column` > `value`.
+    """
+    _validate_column(df, column)
+
+    series = _ensure_datetime_series(df, column)
+    target = pd.to_datetime(value)
+
+    return df[series > target]
+
+
+def filter_date_between(
+    df: pd.DataFrame,
+    column: str,
+    start,
+    end,
+) -> pd.DataFrame:
+    """
+    Return rows where start <= datetime-parsed `column` <= end.
+    """
+    _validate_column(df, column)
+
+    series = _ensure_datetime_series(df, column)
+    start_ts = pd.to_datetime(start)
+    end_ts = pd.to_datetime(end)
+
+    return df[(series >= start_ts) & (series <= end_ts)]
 
 
 def filter_contains(

@@ -4,6 +4,7 @@ from app.models import AIResponse
 from app.dependencies import AgentDependencies
 from app.tools import create_chart, get_dataset_profile, print_backend_capabilities
 from dotenv import load_dotenv
+from app.tools import filter_dataset
 
 load_dotenv()
 
@@ -15,5 +16,6 @@ agent = Agent(
 )
 agent.tool(get_dataset_profile)
 agent.tool(create_chart)
+agent.tool(filter_dataset)
 print_backend_capabilities()
 

@@ -10,6 +10,10 @@ from app.analysis.filtering import (
     filter_missing,
     filter_not_equals,
     filter_not_missing,
+    filter_date_equals,
+    filter_date_before,
+    filter_date_after,
+    filter_date_between,
 )
 from app.analysis.grouping import group_by
 
@@ -68,6 +72,22 @@ class AnalysisEngine:
             self.df,
             column,
         )
+
+
+    def filter_date_equals(self, column, value):
+        return filter_date_equals(self.df, column, value)
+
+
+    def filter_date_before(self, column, value):
+        return filter_date_before(self.df, column, value)
+
+
+    def filter_date_after(self, column, value):
+        return filter_date_after(self.df, column, value)
+
+
+    def filter_date_between(self, column, start, end):
+        return filter_date_between(self.df, column, start, end)
 
     ##################################################
     # Grouping
