@@ -7,3 +7,4 @@ from app.dataset_manager import DatasetManager
 class AgentDependencies:
 
     dataset_manager: DatasetManager
+    last_chart_path: str | None = None

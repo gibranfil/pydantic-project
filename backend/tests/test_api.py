@@ -58,3 +58,29 @@ def test_chat_endpoint_passes_dependencies_to_agent(monkeypatch):
 
     assert response.status_code == 200
     assert response.json()["answer"] == "ok"
+
+
+def test_chat_endpoint_returns_chart_url_when_agent_creates_chart(tmp_path, monkeypatch):
+    chart_path = tmp_path / "sales_revenue_bar.png"
+    chart_path.write_bytes(b"png")
+
+    class FakeOutput:
+        answer = "Chart created"
+
+    class FakeResult:
+        output = FakeOutput()
+
+    async def fake_run(*args, **kwargs):
+        kwargs["deps"].last_chart_path = str(chart_path)
+        return FakeResult()
+
+    monkeypatch.setattr("app.main.agent.run", AsyncMock(side_effect=fake_run))
+
+    response = client.post(
+        "/chat",
+        json={"message": "Make a chart", "dataset": "sales.csv"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["answer"] == "Chart created"
+    assert response.json()["chart_url"].endswith("/sales_revenue_bar.png")

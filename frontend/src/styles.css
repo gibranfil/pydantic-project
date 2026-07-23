@@ -38,6 +38,7 @@ li.active { background: #2563eb; }
 .messages { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 0.75rem; }
 .message { background: #1f2937; padding: 0.75rem 0.85rem; border-radius: 10px; }
 .message.user { background: #1d4ed8; }
+.chat-chart { display: block; max-width: 100%; margin-top: 0.75rem; border-radius: 8px; border: 1px solid #334155; }
 .chat-form { display: flex; gap: 0.5rem; }
 .chat-form input { flex: 1; padding: 0.7rem 0.8rem; border-radius: 8px; border: 1px solid #475569; background: #020617; color: #f8fafc; }
 .chat-form button { padding: 0.7rem 1rem; border: none; border-radius: 8px; background: #2563eb; color: white; cursor: pointer; }

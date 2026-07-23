@@ -72,7 +72,11 @@ function App() {
         dataset: selectedDataset || null,
       })
 
-      setMessages((current) => [...current, { role: 'assistant', content: response.data.answer }])
+      setMessages((current) => [...current, {
+        role: 'assistant',
+        content: response.data.answer,
+        chartUrl: response.data.chart_url || null,
+      }])
     } catch (error) {
       setMessages((current) => [...current, { role: 'assistant', content: 'Could not reach the backend.' }])
     } finally {
@@ -125,6 +129,9 @@ function App() {
             <div key={`${message.role}-${index}`} className={`message ${message.role}`}>
               <strong>{message.role === 'user' ? 'You' : 'AI'}</strong>
               <p>{message.content}</p>
+              {message.chartUrl && (
+                <img className="chat-chart" src={`${API_BASE_URL}${message.chartUrl}`} alt="Generated chart" />
+              )}
             </div>
           ))}
           {loading && <div className="message assistant"><strong>AI</strong><p>Thinking...</p></div>}

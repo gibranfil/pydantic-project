@@ -62,6 +62,7 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     answer: str
     execution_time: float
+    chart_url: str | None = None
 
 
 class AIResponse(BaseModel):

@@ -82,5 +82,6 @@ def create_chart(
         chart_type=chart_type,
         output_dir=output_dir,
     )
+    ctx.deps.last_chart_path = str(output_path)
 
     return f"Chart saved to {output_path}"

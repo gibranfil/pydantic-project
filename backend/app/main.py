@@ -1,7 +1,9 @@
 import time
+from pathlib import Path
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from app.agent import agent
 from app.dataset_manager import dataset_manager
@@ -11,6 +13,8 @@ from app.tools import print_backend_capabilities
 
 app = FastAPI(title="AI Data Analyst Assistant")
 print_backend_capabilities()
+CHARTS_DIR = Path(__file__).resolve().parent.parent / "uploads" / "charts"
+CHARTS_DIR.mkdir(parents=True, exist_ok=True)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -46,6 +50,14 @@ def delete_dataset(filename: str):
     return {"message": "Dataset deleted."}
 
 
+@app.get("/charts/{filename}")
+def get_chart(filename: str):
+    chart_path = CHARTS_DIR / filename
+    if not chart_path.exists():
+        raise HTTPException(status_code=404, detail="Chart not found")
+    return FileResponse(chart_path)
+
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     started_at = time.perf_counter()
@@ -61,6 +73,9 @@ async def chat(request: ChatRequest):
             deps = AgentDependencies(dataset_manager=dataset_manager)
             result = await agent.run(message, deps=deps)
             answer = result.output.answer
+            chart_url = None
+            if deps.last_chart_path:
+                chart_url = f"/charts/{Path(deps.last_chart_path).name}"
         except Exception as exc:
             import traceback
 
@@ -69,9 +84,10 @@ async def chat(request: ChatRequest):
                 "The AI service encountered an error while answering. "
                 f"Details: {exc}"
             )
+            chart_url = None
 
         execution_time = round(time.perf_counter() - started_at, 3)
-        return ChatResponse(answer=answer, execution_time=execution_time)
+        return ChatResponse(answer=answer, execution_time=execution_time, chart_url=chart_url)
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
